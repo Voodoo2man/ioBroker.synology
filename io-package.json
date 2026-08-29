@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "synology",
-    "version": "3.1.0",
+    "version": "3.1.1",
     "news": {
+      "3.1.1": {
+        "en": "Improved per-camera snapshot source configuration",
+        "de": "Verbesserte Snapshot-Quellenauswahl pro Kamera"
+      },
       "3.1.0": {
         "en": "Adapter requires node.js 18 and js-controller >= 5 now\nDependencies have been updated",
         "de": "Adapter benötigt node.js 18 und js-controller >= 5 jetzt\nAbhängigkeiten wurden aktualisiert",
