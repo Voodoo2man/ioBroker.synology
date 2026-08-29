@@ -206,6 +206,19 @@
             "md": 4,
             "lg": 3
         },
+        "snapshotSettingsHeader": {
+            "type": "header",
+            "text": {
+                "en": "Snapshot source per camera",
+                "de": "Snapshot-Quelle je Kamera"
+            },
+            "size": 2,
+            "newLine": true,
+            "help": {
+                "en": "Choose which cameras should use Synology or the direct Reolink snapshot. Reolink cameras only need their camera credentials.",
+                "de": "Lege fest, welche Kameras Synology oder den direkten Reolink-Snapshot verwenden. Für Reolink-Kameras werden nur die Zugangsdaten benötigt."
+            }
+        },
         "snapshotCameras": {
             "type": "table",
             "label": {
@@ -221,9 +234,7 @@
                 {"type": "select", "title": {"en": "Snapshot source", "de": "Snapshot-Quelle"}, "attr": "source", "width": "16%", "options": [{"label": "Synology", "value": "synology"}, {"label": "Reolink", "value": "reolink"}], "default": "synology"},
                 {"type": "text", "title": {"en": "Reolink user", "de": "Reolink-Benutzer"}, "attr": "login", "width": "18%", "hidden": "data.source !== 'reolink'", "help": {"en": "Reolink camera user", "de": "Benutzer der Reolink-Kamera"}},
                 {"type": "password", "title": {"en": "Reolink password", "de": "Reolink-Passwort"}, "attr": "password", "width": "18%", "hidden": "data.source !== 'reolink'", "help": {"en": "Reolink camera password", "de": "Passwort der Reolink-Kamera"}},
-                {"type": "number", "title": {"en": "HTTP port", "de": "HTTP-Port"}, "attr": "port", "width": "10%", "default": 80, "expertMode": true, "help": {"en": "Usually 80. Only change this for a non-standard Reolink HTTP port.", "de": "Normalerweise 80. Nur bei einem abweichenden Reolink-HTTP-Port ändern."}},
-                {"type": "number", "title": {"en": "Channel", "de": "Kanal"}, "attr": "channel", "width": "10%", "default": 0, "expertMode": true, "help": {"en": "Usually 0. Only relevant for multi-channel devices.", "de": "Normalerweise 0. Nur für Geräte mit mehreren Kanälen relevant."}},
-                {"type": "checkbox", "title": {"en": "HTTPS", "de": "HTTPS"}, "attr": "https", "width": "10%", "default": false, "expertMode": true}
+                {"type": "staticText", "text": {"en": "Reolink uses HTTP port 80 and channel 0 automatically.", "de": "Reolink verwendet automatisch HTTP-Port 80 und Kanal 0."}, "attr": "reolinkDefaults", "width": "22%", "hidden": "data.source !== 'reolink'", "doNotSave": true}
             ]
         }
     }
