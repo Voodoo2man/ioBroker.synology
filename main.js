@@ -221,7 +221,30 @@ function startAdapter(options) {
                         label: name,
                         description: states.SurveillanceStation.cameras[name].model || states.SurveillanceStation.cameras[name].vendor || '',
                     }));
-                    obj.callback && adapter.sendTo(obj.from, obj.command, cameraOptions, obj.callback);
+                    if (cameraOptions.length || !adapter.getForeignObjectsAsync) {
+                        obj.callback && adapter.sendTo(obj.from, obj.command, cameraOptions, obj.callback);
+                    } else {
+                        // The adapter may not have completed its first poll when the
+                        // admin page is opened. Fall back to the already-created
+                        // camera objects so the dropdown is still useful.
+                        adapter.getForeignObjectsAsync(`${adapter.namespace}.SurveillanceStation.cameras.*`, 'state')
+                            .then(objects => {
+                                const names = new Map();
+                                Object.keys(objects || {}).forEach(id => {
+                                    const match = id.match(/\.SurveillanceStation\.cameras\.(.+)\.(?:id|linkSnapshot)$/);
+                                    if (!match) return;
+                                    const name = match[1];
+                                    const camera = states.SurveillanceStation.cameras[name] || {};
+                                    names.set(name, {
+                                        value: name,
+                                        label: name,
+                                        description: camera.model || camera.vendor || '',
+                                    });
+                                });
+                                obj.callback && adapter.sendTo(obj.from, obj.command, [...names.values()], obj.callback);
+                            })
+                            .catch(() => obj.callback && adapter.sendTo(obj.from, obj.command, [], obj.callback));
+                    }
                 } else if (obj.command === 'getSnapshot' && obj.message.camId) {
                     getSnapshotCamera(parseInt(obj.message.camId, 10), (res) => {
                         obj.callback && adapter.sendTo(obj.from, obj.command, res, obj.callback);
