@@ -4,6 +4,8 @@
 const utils = require('@iobroker/adapter-core');
 const Syno = require('syno');
 const fs = require('fs');
+const http = require('http');
+const https = require('https');
 const moment = require('moment');
 const path = require('path');
 const simpleSSH = require('simple-ssh');
@@ -29,6 +31,7 @@ let timeOut;
 const verifiedObjects = {};
 let wolTries = 3;
 let wolTimer = null;
+const reolinkSnapshotRequests = new Set();
 
 const stateSS = {
     recStatus:  {
@@ -482,8 +485,57 @@ function addLinkSnapShot() {
         if (nameCam !== undefined) {
             const camId = states.SurveillanceStation.cameras[nameCam].id;
             states.SurveillanceStation.cameras[nameCam].name = nameCam;
-            states.SurveillanceStation.cameras[nameCam].linkSnapshot = createSnapshotLink(syno, camId, states.SurveillanceStation.cameras[nameCam].videoCodec, states.SurveillanceStation.cameras[nameCam], adapter.config, adapter.namespace);
+            const camera = states.SurveillanceStation.cameras[nameCam];
+            const snapshotLink = createSnapshotLink(syno, camId, camera.videoCodec, camera, adapter.config, adapter.namespace);
+            if (snapshotLink && snapshotLink.local) {
+                const fileName = `reolinkSnapshot_${camId}.jpg`;
+                camera.linkSnapshot = `../${adapter.namespace}/${fileName}`;
+                void refreshReolinkSnapshot(camera, snapshotLink.url, fileName);
+            } else {
+                camera.linkSnapshot = snapshotLink;
+            }
         }
+    });
+}
+
+function refreshReolinkSnapshot(camera, snapshotUrl, fileName) {
+    if (reolinkSnapshotRequests.has(fileName)) return Promise.resolve(false);
+    reolinkSnapshotRequests.add(fileName);
+    const transport = snapshotUrl.startsWith('https:') ? https : http;
+    return new Promise(resolve => {
+        const request = transport.get(snapshotUrl, {timeout: 10000}, response => {
+            const chunks = [];
+            let size = 0;
+            response.on('data', chunk => {
+                size += chunk.length;
+                if (size <= 10 * 1024 * 1024) chunks.push(chunk);
+            });
+            response.on('end', async () => {
+                const contentType = String(response.headers['content-type'] || '').toLowerCase();
+                const body = Buffer.concat(chunks);
+                if (response.statusCode !== 200 || !contentType.includes('image/jpeg')) {
+                    adapter.log.warn(`Reolink snapshot for ${camera.name} failed: HTTP ${response.statusCode || 'unknown'}, content-type ${contentType || 'unknown'}`);
+                    reolinkSnapshotRequests.delete(fileName);
+                    return resolve(false);
+                }
+                try {
+                    await adapter.writeFileAsync(adapter.namespace, fileName, body);
+                    fs.writeFileSync(path.join(dir, fileName), body);
+                    debug(`Reolink snapshot updated for ${camera.name}`);
+                    resolve(true);
+                } catch (err) {
+                    error(`Writing Reolink snapshot for ${camera.name} failed`, err);
+                    resolve(false);
+                }
+                reolinkSnapshotRequests.delete(fileName);
+            });
+        });
+        request.on('timeout', () => request.destroy(new Error('request timeout')));
+        request.on('error', err => {
+            adapter.log.warn(`Reolink snapshot for ${camera.name} failed: ${err.message}`);
+            reolinkSnapshotRequests.delete(fileName);
+            resolve(false);
+        });
     });
 }
 
@@ -588,8 +640,15 @@ function parselistCameras(res) {
             );
             // Rebuild immediately, including when a camera was recreated with the same name.
             // H.265 uses the newer Surveillance Station 9 snapshot endpoint.
-            states.SurveillanceStation.cameras[arr[i].name].linkSnapshot = createSnapshotLink(syno, arr[i].id, states.SurveillanceStation.cameras[arr[i].name].videoCodec, states.SurveillanceStation.cameras[arr[i].name], adapter.config, adapter.namespace);
-            adapter.log.debug(`Snapshot source for ${arr[i].name}: ${states.SurveillanceStation.cameras[arr[i].name].linkSnapshot.includes('/cgi-bin/api.cgi?cmd=Snap') ? 'Reolink' : 'Synology'}`);
+            const camera = states.SurveillanceStation.cameras[arr[i].name];
+            const snapshotLink = createSnapshotLink(syno, arr[i].id, camera.videoCodec, camera, adapter.config, adapter.namespace);
+            if (snapshotLink && snapshotLink.local) {
+                const fileName = `reolinkSnapshot_${arr[i].id}.jpg`;
+                camera.linkSnapshot = `../${adapter.namespace}/${fileName}`;
+            } else {
+                camera.linkSnapshot = snapshotLink;
+            }
+            adapter.log.debug(`Snapshot source for ${arr[i].name}: ${snapshotLink && snapshotLink.local ? 'Reolink (local)' : 'Synology'}`);
             states.SurveillanceStation.cameras[arr[i].name].status = stateSS.camStatus[arr[i].status];
             states.SurveillanceStation.cameras[arr[i].name].recStatus = stateSS.recStatus[arr[i].recStatus];
             states.SurveillanceStation.cameras[arr[i].name].enabled = arr[i].enabled;
