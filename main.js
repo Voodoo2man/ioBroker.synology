@@ -579,7 +579,13 @@ function parselistCameras(res) {
             states.SurveillanceStation.cameras[arr[i].name].port = arr[i].port;
             states.SurveillanceStation.cameras[arr[i].name].model = arr[i].model;
             states.SurveillanceStation.cameras[arr[i].name].vendor = arr[i].vendor;
-            states.SurveillanceStation.cameras[arr[i].name].videoCodec = stateSS.videoCodec[arr[i].videoCodec];
+            // Depending on the Surveillance Station version, the codec is either
+            // returned as a numeric videoCodec field or as detailInfo.camVideoType.
+            const reportedCodec = stateSS.videoCodec[arr[i].videoCodec];
+            const detailCodec = arr[i].detailInfo && arr[i].detailInfo.camVideoType;
+            states.SurveillanceStation.cameras[arr[i].name].videoCodec = reportedCodec || (
+                typeof detailCodec === 'string' ? detailCodec.replace(/[.\s-]/g, '').toUpperCase() : undefined
+            );
             // Rebuild immediately, including when a camera was recreated with the same name.
             // H.265 uses the newer Surveillance Station 9 snapshot endpoint.
             states.SurveillanceStation.cameras[arr[i].name].linkSnapshot = createSnapshotLink(syno, arr[i].id, states.SurveillanceStation.cameras[arr[i].name].videoCodec, states.SurveillanceStation.cameras[arr[i].name], adapter.config, adapter.namespace);
