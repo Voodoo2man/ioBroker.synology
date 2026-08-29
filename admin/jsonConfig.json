@@ -206,76 +206,25 @@
             "md": 4,
             "lg": 3
         },
-        "reolinkSnapshotHeader": {
-            "type": "header",
-            "text": {
-                "en": "Optional Reolink H.265 snapshot fallback",
-                "de": "Optionaler Reolink-H.265-Snapshot-Fallback",
-                "ru": "Необязательный резервный снимок Reolink H.265"
+        "snapshotCameras": {
+            "type": "table",
+            "label": {
+                "en": "Snapshot settings per camera",
+                "de": "Snapshot-Einstellungen pro Kamera"
             },
-            "size": 4,
-            "newLine": true
-        },
-        "reolinkSnapshotFallback": {
-            "type": "checkbox",
-            "label": "Use Reolink snapshot fallback",
-            "help": "Enable explicitly for Reolink cameras detected via ONVIF",
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "reolinkCameras": {
-            "type": "json",
-            "label": "Reolink cameras (per camera)",
-            "default": "{}",
-            "help": "Example: {\"Terrasse\": {\"enabled\": true, \"reolinkLogin\": \"viewer\", \"reolinkPassword\": \"secret\", \"reolinkPort\": 80, \"reolinkChannel\": 0}}",
-            "sm": 12,
-            "md": 12,
-            "lg": 12
-        },
-        "reolinkLogin": {
-            "type": "text",
-            "label": "Reolink user",
-            "help": "Used only for H.265 Reolink camera snapshots",
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "reolinkPassword": {
-            "type": "password",
-            "label": "Reolink password",
-            "help": "The snapshot URL contains these credentials",
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "reolinkHttps": {
-            "type": "checkbox",
-            "label": "Reolink HTTPS",
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "reolinkPort": {
-            "type": "number",
-            "label": "Reolink HTTP port",
-            "help": "Normally 80 (443 with HTTPS)",
-            "min": 1,
-            "max": 65535,
-            "step": 1,
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "reolinkChannel": {
-            "type": "number",
-            "label": "Reolink channel",
-            "help": "Normally 0 for a standalone camera",
-            "min": 0,
-            "step": 1,
-            "sm": 12,
-            "md": 4,
-            "lg": 3
+            "help": {
+                "en": "Add one row per camera. Select Reolink only for cameras that should use the direct Reolink JPEG API.",
+                "de": "Eine Zeile pro Kamera anlegen. Reolink nur für Kameras auswählen, die die direkte Reolink-JPEG-API verwenden sollen."
+            },
+            "items": [
+                {"type": "text", "title": {"en": "Camera", "de": "Kamera"}, "attr": "camera", "width": "18%", "filter": true, "sort": true},
+                {"type": "select", "title": {"en": "Snapshot source", "de": "Snapshot-Quelle"}, "attr": "source", "width": "16%", "options": [{"label": "Synology", "value": "synology"}, {"label": "Reolink", "value": "reolink"}], "default": "synology"},
+                {"type": "text", "title": {"en": "Reolink user", "de": "Reolink-Benutzer"}, "attr": "login", "width": "16%"},
+                {"type": "password", "title": {"en": "Reolink password", "de": "Reolink-Passwort"}, "attr": "password", "width": "16%"},
+                {"type": "number", "title": {"en": "Port", "de": "Port"}, "attr": "port", "width": "8%", "default": 80},
+                {"type": "number", "title": {"en": "Channel", "de": "Kanal"}, "attr": "channel", "width": "8%", "default": 0},
+                {"type": "checkbox", "title": {"en": "HTTPS", "de": "HTTPS"}, "attr": "https", "width": "8%", "default": false}
+            ]
         }
     }
 
