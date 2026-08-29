@@ -1,24 +1,8 @@
 {
   "common": {
     "name": "synology",
-    "version": "3.1.9",
+    "version": "3.1.0",
     "news": {
-      "3.1.4": {
-        "en": "Add guided per-camera snapshot source configuration",
-        "de": "Geführte Snapshot-Quellenauswahl pro Kamera hinzugefügt"
-      },
-      "3.1.3": {
-        "en": "Make Surveillance Station cameras selectable in the snapshot settings",
-        "de": "Surveillance-Station-Kameras in den Snapshot-Einstellungen auswählbar machen"
-      },
-      "3.1.2": {
-        "en": "Improved camera selector and advanced Reolink settings",
-        "de": "Verbesserte Kameraauswahl und erweiterte Reolink-Einstellungen"
-      },
-      "3.1.1": {
-        "en": "Improved per-camera snapshot source configuration",
-        "de": "Verbesserte Snapshot-Quellenauswahl pro Kamera"
-      },
       "3.1.0": {
         "en": "Adapter requires node.js 18 and js-controller >= 5 now\nDependencies have been updated",
         "de": "Adapter benötigt node.js 18 und js-controller >= 5 jetzt\nAbhängigkeiten wurden aktualisiert",
