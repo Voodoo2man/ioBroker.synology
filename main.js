@@ -533,6 +533,33 @@ function parselistEvents(res) {
     }
 }
 */
+async function ensureCameraSelectorObject(name, camera) {
+    const id = `SurveillanceStation.cameras.${name}`;
+    if (verifiedObjects[id] === 'channel') {
+        return;
+    }
+
+    try {
+        const existing = await adapter.getObjectAsync(id);
+        if (!existing || existing.type !== 'channel' || existing.common?.role !== 'camera') {
+            await adapter.extendObjectAsync(id, {
+                type: 'channel',
+                common: {
+                    name,
+                    type: 'mixed',
+                    role: 'camera',
+                    read: false,
+                    write: false
+                },
+                native: {cameraId: camera.id}
+            });
+        }
+        verifiedObjects[id] = 'channel';
+    } catch (err) {
+        adapter.log.debug(`Camera selector object for ${name} could not be created: ${err.message}`);
+    }
+}
+
 function parselistCameras(res) {
     debug(`listCameras - Response: ${JSON.stringify(res)}`);
     const arr = res.cameras;
@@ -561,6 +588,9 @@ function parselistCameras(res) {
             states.SurveillanceStation.cameras[arr[i].name].enabled = arr[i].enabled;
             states.SurveillanceStation.cameras[arr[i].name].motionDetected = false;
             states.SurveillanceStation.cameras[arr[i].name].motionDetected = arr[i].recStatus === 2;
+            // Create an explicit camera channel. The admin object selector can then query
+            // camera channels reliably instead of depending on implicit path folders.
+            void ensureCameraSelectorObject(arr[i].name, states.SurveillanceStation.cameras[arr[i].name]);
         }
     });
 }

@@ -233,7 +233,7 @@
             "useCardFor": ["xs", "sm"],
             "titleAttribute": "camera",
             "items": [
-                {"type": "objectId", "title": {"en": "Camera", "de": "Kamera"}, "attr": "camera", "width": "22%", "filterFunc": "obj._id.includes('.SurveillanceStation.cameras.') && obj.common.type !== 'state'", "help": {"en": "Select one of the cameras discovered by Surveillance Station.", "de": "Wähle eine von Surveillance Station erkannte Kamera aus."}},
+                {"type": "objectId", "title": {"en": "Camera", "de": "Kamera"}, "attr": "camera", "width": "22%", "types": ["channel"], "filterFunc": "obj.common && obj.common.role === 'camera'", "help": {"en": "Select one of the cameras discovered by Surveillance Station.", "de": "Wähle eine von Surveillance Station erkannte Kamera aus."}},
                 {"type": "select", "title": {"en": "Snapshot source", "de": "Snapshot-Quelle"}, "attr": "source", "width": "16%", "options": [{"label": "Synology", "value": "synology"}, {"label": "Reolink", "value": "reolink"}], "default": "synology"},
                 {"type": "text", "title": {"en": "Reolink user", "de": "Reolink-Benutzer"}, "attr": "login", "width": "18%", "hidden": "data.source !== 'reolink'", "help": {"en": "Reolink camera user", "de": "Benutzer der Reolink-Kamera"}},
                 {"type": "password", "title": {"en": "Reolink password", "de": "Reolink-Passwort"}, "attr": "password", "width": "18%", "hidden": "data.source !== 'reolink'", "help": {"en": "Reolink camera password", "de": "Passwort der Reolink-Kamera"}},
