@@ -230,7 +230,7 @@
                 "de": "Eine Zeile pro Kamera anlegen. Reolink nur für Kameras auswählen, die die direkte Reolink-JPEG-API verwenden sollen."
             },
             "items": [
-                {"type": "selectSendTo", "title": {"en": "Camera", "de": "Kamera"}, "attr": "camera", "width": "18%", "command": "getSnapshotCameraNames", "manual": false, "noTranslation": true, "filter": true, "sort": true},
+                {"type": "objectId", "title": {"en": "Camera", "de": "Kamera"}, "attr": "camera", "width": "22%", "filterFunc": "obj._id.includes('.SurveillanceStation.cameras.') && obj.common.type === 'channel'", "help": {"en": "Select one of the cameras discovered by Surveillance Station.", "de": "Wähle eine von Surveillance Station erkannte Kamera aus."}},
                 {"type": "select", "title": {"en": "Snapshot source", "de": "Snapshot-Quelle"}, "attr": "source", "width": "16%", "options": [{"label": "Synology", "value": "synology"}, {"label": "Reolink", "value": "reolink"}], "default": "synology"},
                 {"type": "text", "title": {"en": "Reolink user", "de": "Reolink-Benutzer"}, "attr": "login", "width": "18%", "hidden": "data.source !== 'reolink'", "help": {"en": "Reolink camera user", "de": "Benutzer der Reolink-Kamera"}},
                 {"type": "password", "title": {"en": "Reolink password", "de": "Reolink-Passwort"}, "attr": "password", "width": "18%", "hidden": "data.source !== 'reolink'", "help": {"en": "Reolink camera password", "de": "Passwort der Reolink-Kamera"}},
