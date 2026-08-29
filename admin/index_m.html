@@ -10,6 +10,71 @@
     <!--    <link rel="stylesheet" type="text/css" href="style.css"/>-->
     <script type="text/javascript" src="words.js"></script>
     <script type="text/javascript">
+        let snapshotSettings = [];
+        let snapshotCameraOptions = [];
+        let snapshotOnChange = null;
+
+        function snapshotConfigValue(settings) {
+            if (Array.isArray(settings)) return settings;
+            if (typeof settings !== 'string' || !settings) return [];
+            try {
+                const parsed = JSON.parse(settings);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function snapshotStore() {
+            $('#snapshotCameras').val(JSON.stringify(snapshotSettings));
+            if (snapshotOnChange) snapshotOnChange();
+        }
+
+        function snapshotRender() {
+            const $rows = $('#snapshotCameraRows');
+            if (!$rows.length) return;
+            if (!snapshotSettings.length) {
+                $rows.html('<p class="grey-text translate">snapshotNoCameras</p>');
+                return;
+            }
+            $rows.html(snapshotSettings.map((item, index) => {
+                const source = item.source === 'reolink' ? 'reolink' : 'synology';
+                const port = Number(item.port) > 0 ? Number(item.port) : 80;
+                const channel = Number(item.channel) >= 0 ? Number(item.channel) : 0;
+                const fields = source === 'reolink' ?
+                    '<div class="input-field col s12 m4"><input class="snapshot-login" type="text"><label class="active">Reolink-Benutzer</label></div>' +
+                    '<div class="input-field col s12 m4"><input class="snapshot-password" type="password"><label class="active">Reolink-Passwort</label></div>' +
+                    '<div class="col s12"><details><summary>Erweiterte Einstellungen</summary><div class="row"><div class="input-field col s12 m4"><input class="snapshot-port" type="number" min="1" value="' + port + '"><label class="active">HTTP-Port</label></div><div class="input-field col s12 m4"><input class="snapshot-channel" type="number" min="0" value="' + channel + '"><label class="active">Kanal</label></div><div class="input-field col s12 m4"><label><input class="snapshot-https" type="checkbox"' + (item.https ? ' checked' : '') + '><span>HTTPS verwenden</span></label></div></div></details></div>' : '';
+                const html = '<div class="card snapshot-camera-row" data-index="' + index + '"><div class="card-content"><span class="card-title"></span><div class="row"><div class="input-field col s12 m4"><select class="snapshot-camera-source"><option value="synology">Synology</option><option value="reolink">Reolink</option></select><label class="active">Snapshot-Quelle</label></div>' + fields + '</div></div><div class="card-action"><button type="button" class="btn-flat red-text snapshot-remove">Entfernen</button></div></div>';
+                const $row = $(html);
+                $row.find('.card-title').text(item.camera || '');
+                $row.find('.snapshot-camera-source').val(source);
+                $row.find('.snapshot-login').val(item.login || '');
+                $row.find('.snapshot-password').val(item.password || '');
+                return $('<div>').append($row).html();
+            }).join(''));
+            $rows.find('select').formSelect();
+        }
+
+        function snapshotLoadCameras() {
+            if (typeof sendTo !== 'function') return;
+            sendTo(null, 'getSnapshotCameraNames', {}, function (result) {
+                const values = Array.isArray(result) ? result : (result && Array.isArray(result.result) ? result.result : []);
+                snapshotCameraOptions = values.map(item => typeof item === 'string' ? {value: item, label: item} : item);
+                const $select = $('#snapshotCameraAdd').empty();
+                $select.append($('<option>', {value: '', text: 'Kamera auswählen'}));
+                snapshotCameraOptions.forEach(item => $select.append($('<option>', {value: item.value, text: item.label + (item.description ? ' (' + item.description + ')' : '')})));
+                $select.formSelect();
+            });
+        }
+
+        function snapshotInit(settings, onChange) {
+            snapshotOnChange = onChange;
+            snapshotSettings = snapshotConfigValue(settings.snapshotCameras).map(item => ({...item}));
+            snapshotRender();
+            snapshotLoadCameras();
+        }
+
         function load(settings, onChange){
             if (!settings) return;
             $('.value').each(function (){
@@ -37,11 +102,13 @@
                         .on('keyup', () => onChange());
                 }
             });
+            snapshotInit(settings, onChange);
             onChange(false);
             if (M) M.updateTextFields();
         }
 
         function save(callback){
+            snapshotStore();
             var obj = {};
             $('.value').each(function (){
                 var $this = $(this);
@@ -55,6 +122,39 @@
         }
 
         $(document).ready(function (){
+            $(document).on('change', '#snapshotCameraAdd', function () {
+                $('#snapshotCameraAddButton').prop('disabled', !this.value);
+            });
+            $(document).on('click', '#snapshotCameraAddButton', function () {
+                const camera = $('#snapshotCameraAdd').val();
+                if (!camera || snapshotSettings.some(item => item.camera === camera)) return;
+                snapshotSettings.push({camera, source: 'synology', port: 80, channel: 0, https: false});
+                snapshotStore();
+                snapshotRender();
+                $('#snapshotCameraAdd').val('').formSelect();
+                $(this).prop('disabled', true);
+            });
+            $(document).on('click', '.snapshot-remove', function () {
+                snapshotSettings.splice(Number($(this).closest('.snapshot-camera-row').data('index')), 1);
+                snapshotStore();
+                snapshotRender();
+            });
+            $(document).on('change', '.snapshot-camera-source', function () {
+                const row = $(this).closest('.snapshot-camera-row');
+                snapshotSettings[Number(row.data('index'))].source = this.value;
+                snapshotStore();
+                snapshotRender();
+            });
+            $(document).on('input change', '.snapshot-camera-row input', function () {
+                const row = $(this).closest('.snapshot-camera-row');
+                const item = snapshotSettings[Number(row.data('index'))];
+                if ($(this).hasClass('snapshot-login')) item.login = this.value;
+                if ($(this).hasClass('snapshot-password')) item.password = this.value;
+                if ($(this).hasClass('snapshot-port')) item.port = Number(this.value) || 80;
+                if ($(this).hasClass('snapshot-channel')) item.channel = Number(this.value) || 0;
+                if ($(this).hasClass('snapshot-https')) item.https = this.checked;
+                snapshotStore();
+            });
             $('#https').change(function (){
                 if (this.checked){
                     $('.translate').each(function (){
@@ -201,6 +301,18 @@
                 <input type="number" min="60000" class="value" id="slowPollingTime"/>
                 <label for="slowPollingTime" class="translate">slowPollingTime</label>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s12 m10 l10">
+            <h5 class="translate">snapshotTitle</h5>
+            <p class="translate">snapshotDescription</p>
+            <div class="row">
+                <div class="input-field col s12 m8 l8"><select id="snapshotCameraAdd"><option value="">snapshotSelectCamera</option></select><label class="active translate">snapshotSelectCamera</label></div>
+                <div class="input-field col s12 m4 l4"><button type="button" id="snapshotCameraAddButton" class="btn waves-effect waves-light translate" disabled>snapshotAddCamera</button></div>
+            </div>
+            <div id="snapshotCameraRows"></div>
+            <input type="hidden" class="value" id="snapshotCameras" value="[]"/>
         </div>
     </div>
     <div class="row">
