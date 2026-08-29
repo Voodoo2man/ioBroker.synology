@@ -205,6 +205,49 @@
             "sm": 12,
             "md": 4,
             "lg": 3
+        },
+        "reolinkSnapshotHeader": {
+            "type": "header",
+            "text": {
+                "en": "Optional Reolink H.265 snapshot fallback",
+                "de": "Optionaler Reolink-H.265-Snapshot-Fallback",
+                "ru": "Необязательный резервный снимок Reolink H.265"
+            },
+            "size": 4,
+            "newLine": true
+        },
+        "reolinkLogin": {
+            "type": "text",
+            "label": "Reolink user",
+            "help": "Used only for H.265 Reolink camera snapshots",
+            "sm": 12,
+            "md": 4,
+            "lg": 3
+        },
+        "reolinkPassword": {
+            "type": "password",
+            "label": "Reolink password",
+            "help": "The snapshot URL contains these credentials",
+            "sm": 12,
+            "md": 4,
+            "lg": 3
+        },
+        "reolinkHttps": {
+            "type": "checkbox",
+            "label": "Reolink HTTPS",
+            "sm": 12,
+            "md": 4,
+            "lg": 3
+        },
+        "reolinkChannel": {
+            "type": "number",
+            "label": "Reolink channel",
+            "help": "Normally 0 for a standalone camera",
+            "min": 0,
+            "step": 1,
+            "sm": 12,
+            "md": 4,
+            "lg": 3
         }
     }
 

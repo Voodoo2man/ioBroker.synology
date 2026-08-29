@@ -451,7 +451,7 @@ function addLinkSnapShot() {
     Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
         if (nameCam !== undefined) {
             const camId = states.SurveillanceStation.cameras[nameCam].id;
-            states.SurveillanceStation.cameras[nameCam].linkSnapshot = createSnapshotLink(syno, camId, states.SurveillanceStation.cameras[nameCam].videoCodec);
+            states.SurveillanceStation.cameras[nameCam].linkSnapshot = createSnapshotLink(syno, camId, states.SurveillanceStation.cameras[nameCam].videoCodec, states.SurveillanceStation.cameras[nameCam], adapter.config);
         }
     });
 }
@@ -523,7 +523,7 @@ function parselistCameras(res) {
             states.SurveillanceStation.cameras[arr[i].name].videoCodec = stateSS.videoCodec[arr[i].videoCodec];
             // Rebuild immediately, including when a camera was recreated with the same name.
             // H.265 uses the newer Surveillance Station 9 snapshot endpoint.
-            states.SurveillanceStation.cameras[arr[i].name].linkSnapshot = createSnapshotLink(syno, arr[i].id, states.SurveillanceStation.cameras[arr[i].name].videoCodec);
+            states.SurveillanceStation.cameras[arr[i].name].linkSnapshot = createSnapshotLink(syno, arr[i].id, states.SurveillanceStation.cameras[arr[i].name].videoCodec, states.SurveillanceStation.cameras[arr[i].name], adapter.config);
             states.SurveillanceStation.cameras[arr[i].name].status = stateSS.camStatus[arr[i].status];
             states.SurveillanceStation.cameras[arr[i].name].recStatus = stateSS.recStatus[arr[i].recStatus];
             states.SurveillanceStation.cameras[arr[i].name].enabled = arr[i].enabled;
