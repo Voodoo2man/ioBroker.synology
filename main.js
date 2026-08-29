@@ -215,7 +215,14 @@ function startAdapter(options) {
         message:      obj => {
             if (typeof obj === 'object' && obj.command) {
                 debug(`message ******* ${JSON.stringify(obj)}`);
-                if (obj.command === 'getSnapshot' && obj.message.camId) {
+                if (obj.command === 'getSnapshotCameraNames') {
+                    const cameraOptions = Object.keys(states.SurveillanceStation.cameras || {}).map(name => ({
+                        value: name,
+                        label: name,
+                        description: states.SurveillanceStation.cameras[name].model || states.SurveillanceStation.cameras[name].vendor || '',
+                    }));
+                    obj.callback && adapter.sendTo(obj.from, obj.command, cameraOptions, obj.callback);
+                } else if (obj.command === 'getSnapshot' && obj.message.camId) {
                     getSnapshotCamera(parseInt(obj.message.camId, 10), (res) => {
                         obj.callback && adapter.sendTo(obj.from, obj.command, res, obj.callback);
                     });
