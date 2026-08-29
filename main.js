@@ -451,6 +451,7 @@ function addLinkSnapShot() {
     Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
         if (nameCam !== undefined) {
             const camId = states.SurveillanceStation.cameras[nameCam].id;
+            states.SurveillanceStation.cameras[nameCam].name = nameCam;
             states.SurveillanceStation.cameras[nameCam].linkSnapshot = createSnapshotLink(syno, camId, states.SurveillanceStation.cameras[nameCam].videoCodec, states.SurveillanceStation.cameras[nameCam], adapter.config);
         }
     });
@@ -516,6 +517,7 @@ function parselistCameras(res) {
                 states.SurveillanceStation.cameras[arr[i].name] = {};
             }
             states.SurveillanceStation.cameras[arr[i].name].host = arr[i].host || arr[i].ip;
+            states.SurveillanceStation.cameras[arr[i].name].name = arr[i].name;
             states.SurveillanceStation.cameras[arr[i].name].id = arr[i].id;
             states.SurveillanceStation.cameras[arr[i].name].port = arr[i].port;
             states.SurveillanceStation.cameras[arr[i].name].model = arr[i].model;

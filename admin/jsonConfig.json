@@ -224,6 +224,15 @@
             "md": 4,
             "lg": 3
         },
+        "reolinkCameras": {
+            "type": "json",
+            "label": "Reolink cameras (per camera)",
+            "default": "{}",
+            "help": "Example: {\"Terrasse\": {\"enabled\": true, \"reolinkLogin\": \"viewer\", \"reolinkPassword\": \"secret\", \"reolinkPort\": 80, \"reolinkChannel\": 0}}",
+            "sm": 12,
+            "md": 12,
+            "lg": 12
+        },
         "reolinkLogin": {
             "type": "text",
             "label": "Reolink user",
